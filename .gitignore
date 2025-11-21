@@ -1,3 +1,6 @@
 # Data
 
 Analysis/Data_RAW/
+
+# Virtual Environments
+.venv

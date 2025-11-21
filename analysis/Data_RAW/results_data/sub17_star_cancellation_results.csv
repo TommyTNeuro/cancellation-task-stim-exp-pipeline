@@ -1,0 +1,4 @@
+participant_id,participant_group,round_index,time_used,targets_total,found_total,omissions_total,q1_hits,q2_hits,q3_hits,q4_hits,q1_misses,q2_misses,q3_misses,q4_misses
+17,01,1,30.00,112,39,73,20,0,19,0,12,25,14,22
+17,01,2,30.00,112,39,73,10,10,3,16,8,18,23,24
+17,01,3,30.00,112,39,73,13,3,18,5,10,21,15,27
