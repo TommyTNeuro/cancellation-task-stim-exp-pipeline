@@ -1,6 +1,5 @@
 # Data
-
-Analysis/Data_RAW/
+data/RAW
 
 # Virtual Environments
 .venv
