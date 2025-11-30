@@ -1,4 +1,0 @@
-participant_id,participant_group,round_index,time_used,targets_total,found_total,omissions_total,q1_hits,q2_hits,q3_hits,q4_hits,q1_misses,q2_misses,q3_misses,q4_misses
-9,01,1,30.00,112,41,71,22,5,14,0,12,19,17,23
-9,01,2,30.00,112,41,71,3,17,4,17,22,20,16,13
-9,01,3,30.00,112,40,72,15,5,16,4,17,29,9,17
