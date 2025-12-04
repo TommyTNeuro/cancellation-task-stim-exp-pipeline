@@ -13,5 +13,5 @@ high-performance and accurate.
  - State of the art spatial attentional analysis.
  - Extensive documentation on how to use program.
  - Eye-Tracking support.
- - Neuroimaging support (OPM-MEG/SQUID MEG, EEG, MRI).
+ - Neuroimaging support (OPM-MEG/SQUID MEG, EEG).
  - High-Performance Rust Core.
