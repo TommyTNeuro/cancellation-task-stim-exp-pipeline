@@ -1,6 +1,9 @@
-def main():
-    print("Hello from cancellation-task-stim-and-analysis-pipeline!")
+import polars as pl
+from pathlib import Path
 
+def scout_files():
+
+    
 
 if __name__ == "__main__":
     main()
