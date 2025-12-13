@@ -323,8 +323,6 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
         if all(target_selected)
             break;
         end
-        
-        WaitSecs(0.01);
     end
     ListenChar(0);
     
