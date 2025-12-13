@@ -1,6 +1,6 @@
 function star_cancellation_task()
 commandwindow;
-Screen('Preference', 'SkipSyncTests', 1);
+Screen('Preference', 'SkipSyncTests', 0);
 % STAR_CANCELLATION_EXPERIMENT
 %
 % Author: Tommy Roberts
@@ -235,7 +235,7 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
         % 6. Write Header (only if file is new)
         if ~exist(bids_csv_path, 'file')
             fid = fopen(bids_csv_path, 'a');
-            header_str = 'participant_id,group,round_index,onset,x,y,quadrant,was_target,target_quadrant\n';
+            header_str = 'participant_id,group,round_index,onset,x,y,quadrant,was_target\n';
             fprintf(fid, header_str);
             fclose(fid);
         end
@@ -304,10 +304,10 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
                 % *** FIX: USE bids_csv_path HERE ***
                 fid = fopen(bids_csv_path, 'a'); 
                 fprintf(fid, ...
-                    '%d,%s,%d,%.3f,%.2f,%.2f,%d,%d,%d\n', ...
+                    '%d,%s,%d,%.3f,%.2f,%.2f,%d,%d\n', ...
                     participant_id, participant_group, round_index, ...
                     click_time, mx, my, ...
-                    click_quadrant, was_target, target_quadrant);
+                    click_quadrant, was_target);
                 fclose(fid);
             end
             
