@@ -1,6 +1,6 @@
 function star_cancellation_task()
 commandwindow;
-Screen('Preference', 'SkipSyncTests', 1);
+Screen('Preference', 'SkipSyncTests', 0);
 % STAR_CANCELLATION_EXPERIMENT
 %
 % Author: Tommy Roberts
@@ -364,41 +364,33 @@ end
 
 %% ================= HELPER FUNCTIONS =================
 function words_cell = pick_word_set(condition_name)
-% Returns 20 file paths for each language (English/Hindi/Arabic).
+    % 1. Get the path of this current script file
+    scriptPath = fileparts(mfilename('fullpath'));
+    
+    % 2. Define the image directory relative to the script
+    % fileparts(scriptPath) goes up one level (..)
+    % Then we go down into 'assets' and 'word_images'
+    imgDir = fullfile(fileparts(scriptPath), 'assets', 'word_images');
+
+    % 3. Determine the file prefix based on language
     switch lower(condition_name)
         case 'english'
-            words_cell = {
-                'word_images/Eng1.png','word_images/Eng2.png','word_images/Eng3.png','word_images/Eng4.png',...
-                'word_images/Eng5.png','word_images/Eng6.png','word_images/Eng7.png','word_images/Eng8.png',...
-                'word_images/Eng9.png','word_images/Eng10.png','word_images/Eng11.png','word_images/Eng12.png',...
-                'word_images/Eng13.png','word_images/Eng14.png','word_images/Eng15.png','word_images/Eng16.png',...
-                'word_images/Eng17.png','word_images/Eng18.png','word_images/Eng19.png','word_images/Eng20.png'
-            };
+            prefix = 'Eng';
         case 'hindi'
-            words_cell = {
-                'word_images/Hin1.png','word_images/Hin2.png','word_images/Hin3.png','word_images/Hin4.png',...
-                'word_images/Hin5.png','word_images/Hin6.png','word_images/Hin7.png','word_images/Hin8.png',...
-                'word_images/Hin9.png','word_images/Hin10.png','word_images/Hin11.png','word_images/Hin12.png',...
-                'word_images/Hin13.png','word_images/Hin14.png','word_images/Hin15.png','word_images/Hin16.png',...
-                'word_images/Hin17.png','word_images/Hin18.png','word_images/Hin19.png','word_images/Hin20.png'
-            };
+            prefix = 'Hin';
         case 'arabic'
-            words_cell = {
-                'word_images/Ara1.png','word_images/Ara2.png','word_images/Ara3.png','word_images/Ara4.png',...
-                'word_images/Ara5.png','word_images/Ara6.png','word_images/Ara7.png','word_images/Ara8.png',...
-                'word_images/Ara9.png','word_images/Ara10.png','word_images/Ara11.png','word_images/Ara12.png',...
-                'word_images/Ara13.png','word_images/Ara14.png','word_images/Ara15.png','word_images/Ara16.png',...
-                'word_images/Ara17.png','word_images/Ara18.png','word_images/Ara19.png','word_images/Ara20.png'
-            };
+            prefix = 'Ara';
         otherwise
-            % Fallback = English set
-            words_cell = {
-                'word_images/Eng1.png','word_images/Eng2.png','word_images/Eng3.png','word_images/Eng4.png',...
-                'word_images/Eng5.png','word_images/Eng6.png','word_images/Eng7.png','word_images/Eng8.png',...
-                'word_images/Eng9.png','word_images/Eng10.png','word_images/Eng11.png','word_images/Eng12.png',...
-                'word_images/Eng13.png','word_images/Eng14.png','word_images/Eng15.png','word_images/Eng16.png',...
-                'word_images/Eng17.png','word_images/Eng18.png','word_images/Eng19.png','word_images/Eng20.png'
-            };
+            % Fallback
+            prefix = 'Eng';
+    end
+    
+    % 4. Generate the 20 filenames automatically
+    words_cell = cell(1, 20); % Pre-allocate
+    for i = 1:20
+        % Creates: /path/to/assets/word_images/Eng1.png
+        fileName = sprintf('%s%d.png', prefix, i);
+        words_cell{i} = fullfile(imgDir, fileName);
     end
 end
 
