@@ -232,10 +232,11 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
         fileName = sprintf('%s_task-star_beh.csv', subLabel);
         bids_csv_path = fullfile(behDir, fileName);
         
-        % 6. Write Header (only if file is new)
+        % % 6. Write Header (only if file is new)
         if ~exist(bids_csv_path, 'file')
             fid = fopen(bids_csv_path, 'a');
-            header_str = 'participant_id,group,round_index,onset,x,y,quadrant,was_target\n';
+            % --- CHANGED: Added screen_width and screen_height ---
+            header_str = 'participant_id,group,round_index,onset,x,y,quadrant,was_target,screen_width,screen_height\n';
             fprintf(fid, header_str);
             fclose(fid);
         end
@@ -301,13 +302,14 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
             
             % --- Log CLICK to the single BIDS CSV ---
             if do_csv
-                % *** FIX: USE bids_csv_path HERE ***
                 fid = fopen(bids_csv_path, 'a'); 
+                % --- CHANGED: Added two %d placeholders and the screen variables ---
                 fprintf(fid, ...
-                    '%d,%s,%d,%.3f,%.2f,%.2f,%d,%d\n', ...
+                    '%d,%s,%d,%.3f,%.2f,%.2f,%d,%d,%d,%d\n', ...
                     participant_id, participant_group, round_index, ...
                     click_time, mx, my, ...
-                    click_quadrant, was_target);
+                    click_quadrant, was_target, ...
+                    screen_x, screen_y); % <--- Added variables here
                 fclose(fid);
             end
             
