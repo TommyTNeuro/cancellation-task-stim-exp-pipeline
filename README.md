@@ -21,4 +21,6 @@ but only updated with critial bug fixes.
  - Extensive documentation on how to use program.
  - Eye-Tracking support.
  - Neuroimaging support (OPM-MEG/SQUID MEG, EEG).
+ - Support for real-time feedback.
+ - Support for additional languages.
  - High-Performance Rust Core.
