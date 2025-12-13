@@ -1,5 +1,8 @@
 # Data
-data/RAW/
+data/
 
 # Virtual Environments
 .venv
+
+# Notebook checkpoints
+/analysis/notebooks/.ipynb_checkpoints/
