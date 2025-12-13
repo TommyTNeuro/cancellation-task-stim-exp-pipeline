@@ -1,6 +1,6 @@
 function star_cancellation_task()
 commandwindow;
-Screen('Preference', 'SkipSyncTests', 0);
+Screen('Preference', 'SkipSyncTests', 1);
 % STAR_CANCELLATION_EXPERIMENT
 %
 % Author: Tommy Roberts
@@ -163,9 +163,6 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
     num_targets, num_big_stars, num_words, ...
     small_star_radius, big_star_radius, word_radius, ...
     round_duration, round_index, do_csv, varargin)
-% RUN_CANCELLATION_ROUND
-%   - star_cancellation_clicks.csv : logs each click
-%   - star_cancellation_results.csv: logs summary with quadrant hits & misses
 
     if nargin > 21
         internal_condition_name = varargin{1};
@@ -182,44 +179,69 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
     DrawFormattedText(window, intro_text, 'center','center', textColor, 60);
     Screen('Flip', window);
     KbStrokeWait;
-
+    
     % Prepare stimuli
     distractor_words  = pick_word_set(internal_condition_name);
     small_star_coords = create_star(small_star_radius);
     big_star_coords   = create_star(big_star_radius);
     word_textures     = create_words(num_words, distractor_words, window);
-
+    
     % Generate positions
     [target_positions, big_star_positions, word_positions] = ...
         generate_non_overlapping_positions(screen_x, screen_y, ...
             num_targets, num_big_stars, num_words, ...
             small_star_radius, big_star_radius, word_radius);
-
+            
     target_selected = false(num_targets,1);
-
-    % For quadrant misses/hits at the end
+    
+    % For quadrant misses/hits (internal calculation only now)
     q_totals = zeros(1,4);  
     for tt = 1:num_targets
         q_num = get_quadrant(target_positions(tt,1), target_positions(tt,2), x_center, y_center);
         q_totals(q_num) = q_totals(q_num) + 1;
     end
-
+    
     round_start_time = GetSecs;
     ListenChar(2);
-
-    % Prepare to log clicks
-    clicks_csv = 'star_cancellation_clicks.csv';
-    file_exists_clicks = exist(clicks_csv, 'file');
-    if file_exists_clicks == 0
-        fid_clicks = fopen(clicks_csv, 'a');
-        header_str = [
-            'participant_id,participant_group,round_index,click_time,click_x,click_y,' ...
-            'click_quadrant,was_target,target_quadrant\n'
-        ];
-        fprintf(fid_clicks, header_str);
-        fclose(fid_clicks);
+    
+    % =========================================================================
+    % === PATH DEFINITION START ===
+    % =========================================================================
+    bids_csv_path = ''; % Initialize variable to empty
+    
+    if do_csv
+        % 1. Define Root Directory (2 levels up from this script)
+        scriptPath = fileparts(mfilename('fullpath'));
+        rootDir    = fileparts(fileparts(scriptPath)); 
+        
+        % 2. Define Subject String
+        subLabel = sprintf('sub-%03d', participant_id);
+        
+        % 3. Build Path: root / data / raw / sub-001 / beh
+        behDir = fullfile(rootDir, 'data', 'raw', subLabel, 'beh');
+        
+        % 4. Create the Directory Structure if it doesn't exist
+        if ~exist(behDir, 'dir')
+            [status, msg] = mkdir(behDir);
+            if ~status
+                error(['[ERROR] Could not create directory: ' behDir '. Message: ' msg]);
+            end
+        end
+        
+        % 5. Define the File Path
+        fileName = sprintf('%s_task-star_beh.csv', subLabel);
+        bids_csv_path = fullfile(behDir, fileName);
+        
+        % 6. Write Header (only if file is new)
+        if ~exist(bids_csv_path, 'file')
+            fid = fopen(bids_csv_path, 'a');
+            header_str = 'participant_id,group,round_index,onset,x,y,quadrant,was_target,target_quadrant\n';
+            fprintf(fid, header_str);
+            fclose(fid);
+        end
     end
-
+    % =========================================================================
+    
     %% ===== Main loop =====
     while true
         % --- Check for ESC key ---
@@ -228,121 +250,89 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
             disp('[DEBUG] ESC pressed. Ending round early.');
             break;
         end
-
+        
         % --- Check time limit ---
         elapsed = GetSecs - round_start_time;
         if elapsed >= round_duration
             break;
         end
-
+        
         % --- Get current mouse position ---
         [mx, my, buttons] = GetMouse(window);
-
-        % --- Redraw the display, including custom cursor ---
+        
+        % --- Redraw the display ---
         draw_all_stimuli(window, bgColor, stimColor, cursorColor, ...
             target_positions, target_selected, small_star_coords, ...
             big_star_positions, big_star_coords, ...
             word_positions, word_textures, ...
             num_targets, num_big_stars, num_words);
-
+        
         % --- If the mouse is pressed, check for target click ---
         if any(buttons)
-            click_time     = GetSecs - round_start_time;
+            click_time     = GetSecs - round_start_time; % This is 'onset'
             click_quadrant = get_quadrant(mx, my, x_center, y_center);
-
             was_target      = 0;
             target_quadrant = 0;
-
+            
             % Big star small star overlap check
             for t = 1:num_targets
                 if ~target_selected(t)
                     dx = mx - target_positions(t,1);
                     dy = my - target_positions(t,2);
                     dist_val = sqrt(dx^2 + dy^2);
+                    
                     if dist_val <= small_star_radius
                         was_target          = 1;
                         target_selected(t)  = true;
                         target_quadrant     = get_quadrant(...
                             target_positions(t,1), target_positions(t,2), ...
                             x_center, y_center);
-
-                        % Immediately redraw so the star shows as 'found'
+                        
+                        % Immediately redraw
                         draw_all_stimuli(window, bgColor, stimColor, cursorColor, ...
                             target_positions, target_selected, small_star_coords, ...
                             big_star_positions, big_star_coords, ...
                             word_positions, word_textures, ...
                             num_targets, num_big_stars, num_words);
-
                         break; 
                     end
                 end
             end
-
-            % --- Log click to CSV ---
-            fid_clicks = fopen(clicks_csv, 'a');
-            fprintf(fid_clicks, ...
-                '%d,%s,%d,%.3f,%.2f,%.2f,%d,%d,%d\n', ...
-                participant_id, participant_group, round_index, ...
-                click_time, mx, my, ...
-                click_quadrant, was_target, target_quadrant);
-            fclose(fid_clicks);
-
+            
+            % --- Log CLICK to the single BIDS CSV ---
+            if do_csv
+                % *** FIX: USE bids_csv_path HERE ***
+                fid = fopen(bids_csv_path, 'a'); 
+                fprintf(fid, ...
+                    '%d,%s,%d,%.3f,%.2f,%.2f,%d,%d,%d\n', ...
+                    participant_id, participant_group, round_index, ...
+                    click_time, mx, my, ...
+                    click_quadrant, was_target, target_quadrant);
+                fclose(fid);
+            end
+            
             % Wait until mouse release
             while any(buttons)
                 [~,~,buttons] = GetMouse(window);
             end
         end
-
+        
         % --- If all targets are found, end early ---
         if all(target_selected)
             break;
         end
+        
         WaitSecs(0.01);
     end
-
     ListenChar(0);
-
-    % --- Final Tally ---
+    
+    % --- Final Tally (Displayed on screen only) ---
     total_selected = sum(target_selected);
-    omissions      = num_targets - total_selected;
     time_used      = min(GetSecs - round_start_time, round_duration);
-
-    q_hits = zeros(1,4);
-    for t = 1:num_targets
-        if target_selected(t)
-            qq = get_quadrant(target_positions(t,1), target_positions(t,2), x_center, y_center);
-            q_hits(qq) = q_hits(qq) + 1;
-        end
-    end
-    q_misses = q_totals - q_hits;
-
-    % --- Save summary to main CSV ---
-    if do_csv && (round_index > 0)
-        results_csv = 'star_cancellation_results.csv';
-        file_exists_main = exist(results_csv, 'file');
-        if file_exists_main == 0
-            fid_main = fopen(results_csv, 'a');
-            hdr_main = [
-                'participant_id,participant_group,round_index,time_used,targets_total,found_total,omissions_total,' ...
-                'q1_hits,q2_hits,q3_hits,q4_hits,q1_misses,q2_misses,q3_misses,q4_misses\n'
-            ];
-            fprintf(fid_main, hdr_main);
-            fclose(fid_main);
-        end
-
-        fid_main = fopen(results_csv, 'a');
-        fprintf(fid_main, ...
-            '%d,%s,%d,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n',...
-            participant_id, participant_group, round_index, time_used, ...
-            num_targets, total_selected, omissions, ...
-            q_hits(1), q_hits(2), q_hits(3), q_hits(4), ...
-            q_misses(1), q_misses(2), q_misses(3), q_misses(4));
-        fclose(fid_main);
-    end
-
+    
     % --- End-of-round screen ---
     if round_index == 0
-        % Practice Round => show stats
+        % Practice Round
         summary_txt = sprintf([
             'Practice Round Complete!\n\n' ...
             'Time used: %.1f s\n' ...
@@ -353,14 +343,13 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
         Screen('Flip', window);
         KbStrokeWait;
     else
-        % Normal round no stats on screen
+        % Normal round
         end_text = 'Round complete!\n\nPress any key to continue...';
         DrawFormattedText(window, end_text, 'center','center', textColor, 60);
         Screen('Flip', window);
         KbStrokeWait;
     end
 end
-
 
 %% ================= HELPER FUNCTIONS =================
 function words_cell = pick_word_set(condition_name)
