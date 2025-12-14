@@ -10,25 +10,26 @@ Screen('Preference', 'SkipSyncTests', 0);
 % data as well as click data is collected in seperate csv file.
 
     % === 1) GUI FOR PARTICIPANT / GROUP / ROUNDS ===
-    prompts       = {'Participant ID:', 'Participant Group:', 'Rounds to run (e.g. "1,2,3"):'};
+    prompts       = {'Participant ID:', 'Participant Group:', 'Session Number:', 'Rounds to run (e.g. "1,2,3"):'};
     dlg_title     = 'Experiment Setup';
     dims          = [1 50];
-    default_input = {'', '', '1,2,3'};
+    default_input = {'', '', '1', '1,2,3'}; 
     answer        = inputdlg(prompts, dlg_title, dims, default_input);
-
+    
     if isempty(answer)
         disp('User cancelled. Exiting...');
         return;
     end
-
     participant_id    = str2double(answer{1});
     participant_group = strtrim(answer{2});
-    if isnan(participant_id)
-        disp('Participant ID must be numeric. Exiting...');
+    session_id        = str2double(answer{3}); 
+    
+    if isnan(participant_id) || isnan(session_id)
+        disp('Participant ID and Session Number must be numeric. Exiting...');
         return;
     end
-
-    round_list    = strsplit(answer{3}, ',');
+    
+    round_list    = strsplit(answer{4}, ',');
     round_list    = strtrim(round_list);
     valid_rounds  = ismember(round_list, {'1','2','3'});
     if ~all(valid_rounds)
@@ -88,7 +89,7 @@ Screen('Preference', 'SkipSyncTests', 0);
         run_cancellation_round(window, ...
             bgColor, textColor, stimColor, cursorColor, ...
             screen_x_pixels, screen_y_pixels, x_center, y_center, ...
-            participant_id, participant_group, ...
+            participant_id, participant_group, session_id, ...
             'Practice Round', ...   
             8, 4, 4, ...            % small_stars, big_stars, words
             15, 40, 50, ...         % radii
@@ -127,7 +128,7 @@ Screen('Preference', 'SkipSyncTests', 0);
             run_cancellation_round(window, ...
                 bgColor, textColor, stimColor, cursorColor, ...
                 screen_x_pixels, screen_y_pixels, x_center, y_center, ...
-                participant_id, participant_group, ...
+                participant_id, participant_group, session_id, ...
                 round_label, ...
                 112, 104, 20, ...  % small_stars, big_stars, words
                 15, 40, 50, ...    % radii
@@ -159,7 +160,7 @@ end
 %% =================== SUBFUNCTIONS ===================
 function run_cancellation_round(window, bgColor, textColor, stimColor, cursorColor, ...
     screen_x, screen_y, x_center, y_center, ...
-    participant_id, participant_group, round_label, ...
+    participant_id, participant_group, session_id, round_label, ...
     num_targets, num_big_stars, num_words, ...
     small_star_radius, big_star_radius, word_radius, ...
     round_duration, round_index, do_csv, varargin)
@@ -215,10 +216,11 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
         rootDir    = fileparts(fileparts(scriptPath)); 
         
         % 2. Define Subject String
-        subLabel = sprintf('sub-%03d', participant_id);
+        subLabel = sprintf('sub-%02d', participant_id);
+        sesLabel = sprintf('ses-%02d', session_id);
         
-        % 3. Build Path: root / data / raw / sub-001 / beh
-        behDir = fullfile(rootDir, 'data', 'raw', subLabel, 'beh');
+        % 3. Build Path: root / data / raw / sub-001 / ses-01 / beh
+        behDir = fullfile(rootDir, 'data', 'raw', subLabel, sesLabel, 'beh');
         
         % 4. Create the Directory Structure if it doesn't exist
         if ~exist(behDir, 'dir')
@@ -229,7 +231,7 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
         end
         
         % 5. Define the File Path
-        fileName = sprintf('%s_task-star_beh.csv', subLabel);
+        fileName = sprintf('%s_%s_task-star_beh.csv', subLabel, sesLabel);
         bids_csv_path = fullfile(behDir, fileName);
         
         % % 6. Write Header (only if file is new)
@@ -303,13 +305,12 @@ function run_cancellation_round(window, bgColor, textColor, stimColor, cursorCol
             % --- Log CLICK to the single BIDS CSV ---
             if do_csv
                 fid = fopen(bids_csv_path, 'a'); 
-                % --- CHANGED: Added two %d placeholders and the screen variables ---
                 fprintf(fid, ...
                     '%d,%s,%d,%.3f,%.2f,%.2f,%d,%d,%d,%d\n', ...
                     participant_id, participant_group, round_index, ...
                     click_time, mx, my, ...
                     click_quadrant, was_target, ...
-                    screen_x, screen_y); % <--- Added variables here
+                    screen_x, screen_y);
                 fclose(fid);
             end
             
