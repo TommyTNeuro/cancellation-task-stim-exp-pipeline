@@ -37,9 +37,10 @@ def load_subjects(paths_to_data):
 
 def norm_data(participant_data):
     norm_combined_data = participant_data.with_columns(
-        pl.col("x").truediv(pl.col("screen_width")).alias("norm_x"),
-        pl.col("y").truediv(pl.col("screen_height")).alias("norm_y"),
+        (pl.col("x").truediv(pl.col("screen_width")) * 2 - 1).alias("norm_x"),
+        (1 - pl.col("y").truediv(pl.col("screen_height")) * 2).alias("norm_y"),
     )
+
     print(norm_combined_data)
     return norm_combined_data
 
