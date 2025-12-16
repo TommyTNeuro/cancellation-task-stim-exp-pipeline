@@ -14,7 +14,9 @@ def import_files():
 
 def subjective_epicentre(data):
     subjective_epicentre = data.group_by("participant_id").agg(pl.mean("norm_x"))
-    subjective_epicentre = pl.concat([data, subjective_epicentre])
+    subjective_epicentre = subjective_epicentre.rename(
+        {"norm_x": "subjective_epicentre"}
+    )
     return subjective_epicentre
 
 
