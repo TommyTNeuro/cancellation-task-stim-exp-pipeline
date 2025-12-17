@@ -1,8 +1,7 @@
 import polars as pl
 from pathlib import Path
 from scipy import stats
-
-ROOT_DIR = Path(__file__).parents[2]
+from config import ROOT_DIR
 
 
 def t_test():
