@@ -8,7 +8,6 @@ ROOT_DIR = Path(__file__).parents[2]
 def import_files():
     data_dir = sorted(ROOT_DIR.rglob("data/preprocessed/*.parquet"))
     cleaned_subject_data = pl.read_parquet(data_dir)
-
     return cleaned_subject_data
 
 
@@ -18,6 +17,11 @@ def subjective_epicentre(data):
         {"norm_x": "subjective_epicentre"}
     )
     return subjective_epicentre
+
+
+def first_mark(data):
+    first_mark_data = data.group_by("participant_id").agg("")
+    print(first_mark_data)
 
 
 def save_data(data):
@@ -34,8 +38,7 @@ def save_data(data):
 def main():
     cancellation_data = import_files()
     subjective_epicentre_data = subjective_epicentre(cancellation_data)
-    print(subjective_epicentre_data)
-    save_data(subjective_epicentre_data)
+    first_mark(cancellation_data)
 
 
 if __name__ == "__main__":
