@@ -1,5 +1,5 @@
 site_name: Cancellation Task Documentation
-theme: readthedocs
+theme: material
 nav:
   - Home: index.md
   - Getting Started: getting_started.md

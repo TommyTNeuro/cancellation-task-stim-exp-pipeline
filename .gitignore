@@ -9,3 +9,6 @@ data/
 
 # Python Cache
 __pycache__/
+
+# Documentation Site
+site/

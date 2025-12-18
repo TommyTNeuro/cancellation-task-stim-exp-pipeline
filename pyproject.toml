@@ -13,4 +13,5 @@ dependencies = [
 dev = [
     "jupyterlab>=4.5.0",
     "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.1",
 ]
