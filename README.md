@@ -35,6 +35,11 @@ but only updated with critial bug fixes.
  - Support for additional languages.
  - High-Performance Rust Core.
 
+## Troubleshooting
+
+ - When trying to use a different python version than the version specified (3.10) be warned that as of developing this that python3.10 is the recommended version for psychoPy.
+ - If on a linux system (Me too so hello my linux friend) be warned that PsychoPy relies on wxpython which relied on GTK currently as of writing only GTK3-devel works not GTK4. 
+
  ## Citation
 
  When using this task or pipeline please cite the github
