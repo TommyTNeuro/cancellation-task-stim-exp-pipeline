@@ -3,15 +3,13 @@ name = "cancellation-task-stim-and-analysis-pipeline"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "polars>=1.36.1",
-    "scipy>=1.16.3",
-]
+requires-python = "==3.10.*"
+dependencies = []
 
 [dependency-groups]
-dev = [
-    "jupyterlab>=4.5.0",
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.7.1",
+dev = []
+
+[tool.uv.workspace]
+members = [
+    "experiment/python_version",
 ]
